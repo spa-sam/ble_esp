@@ -1,0 +1,57 @@
+# Загальні ігнорування
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Специфічні для Expo
+.expo-shared/
+*.log
+
+# Android специфічні
+android/
+*.hprof
+.idea/
+*.iml
+local.properties
+.gradle/
+build/
+captures/
+
+# iOS специфічні (на всякий випадок)
+ios/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS специфічні
+.DS_Store
+
+# Інші файли, які зазвичай не потребують форматування
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.ttf
+*.otf
+*.woff
+*.woff2
+*.eot
+
+# Конфігураційні файли
+app.json
+metro.config.js
+babel.config.js
+
+# Файли залежностей
+package-lock.json
+yarn.lock
