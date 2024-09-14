@@ -1,49 +1,56 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList } from 'react-native';
 import ConnectedDevice from './src/components/ConnectedDevice';
 import AnalogValue from './src/components/AnalogValue';
 import LedControl from './src/components/LedControl';
+import DeviceList from './src/components/DeviceList';
 import { useBleManager } from './src/hooks/useBleManager';
 
 export default function App() {
   const {
     isScanning,
+    devices,
     connectedDevice,
     analogValue,
     isConnected,
     led12State,
     led13State,
-    handleScanButton,
+    isReconnecting,
+    startScan,
+    connectToDevice,
+    disconnect,
     toggleLed,
   } = useBleManager();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Тестова програма BLE для ESP32-C3</Text>
-
       <View style={styles.scanButtonContainer}>
-        <Button
-          title={
-            isScanning
-              ? 'Сканування...'
-              : isConnected
-                ? 'Відключитися'
-                : 'Підключитися'
-          }
-          onPress={handleScanButton}
-          disabled={isScanning}
-        />
+        {isConnected ? (
+          <Button title="Відключитися" onPress={disconnect} />
+        ) : (
+          <Button
+            title={isScanning ? 'Сканування...' : 'Почати сканування'}
+            onPress={startScan}
+            disabled={isScanning}
+          />
+        )}
       </View>
-
-      <ConnectedDevice device={connectedDevice} />
-      <AnalogValue value={analogValue} />
-
       {isConnected && (
-        <LedControl
-          led12State={led12State}
-          led13State={led13State}
-          toggleLed={toggleLed}
-        />
+        <>
+          <ConnectedDevice device={connectedDevice} />
+          <AnalogValue value={analogValue} />
+          <LedControl
+            led12State={led12State}
+            led13State={led13State}
+            toggleLed={toggleLed}
+          />
+          {/* <Button title="Відключитися" onPress={disconnect} /> */}
+        </>
+      )}
+
+      {isReconnecting && (
+        <Text style={styles.reconnectingText}>Переподключення...</Text>
       )}
     </View>
   );
@@ -63,5 +70,10 @@ const styles = StyleSheet.create({
   },
   scanButtonContainer: {
     marginBottom: 20,
+  },
+  reconnectingText: {
+    textAlign: 'center',
+    color: 'orange',
+    marginTop: 10,
   },
 });

@@ -49,3 +49,14 @@ export const startStreamingData = (
     }
   );
 };
+
+export const filterDevices = (devices: Device[]): Device | null => {
+  return (
+    devices.find(
+      device =>
+        device.name === 'ESP32-C3 Analog' ||
+        (device.serviceUUIDs &&
+          device.serviceUUIDs.includes(ESP32_SERVICE_UUID))
+    ) || null
+  );
+};
