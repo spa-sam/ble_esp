@@ -3,9 +3,11 @@ import { Device } from 'react-native-ble-plx';
 import { useBleScan } from './useBleScan';
 import { connectToDevice, disconnect } from './bleConnection';
 import { toggleLed } from './ledControl';
+import { filterDevices } from '../utils/bleUtils';
 
 export const useBleManager = () => {
   const [devices, setDevices] = useState<Device[]>([]);
+  const [cachedDevices, setCachedDevices] = useState<Device[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
   const [analogValue, setAnalogValue] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -41,11 +43,18 @@ export const useBleManager = () => {
   }, []);
 
   const handleStartScan = useCallback(() => {
+    const cachedDevice = cachedDevices.find(device => filterDevices([device]));
+    if (cachedDevice) {
+      handleConnectToDevice(cachedDevice);
+      return;
+    }
+
     startScan(device => {
       setDevices(prevDevices => [...prevDevices, device]);
+      setCachedDevices(prevCachedDevices => [...prevCachedDevices, device]);
       handleConnectToDevice(device);
     });
-  }, [handleConnectToDevice, startScan]);
+  }, [handleConnectToDevice, startScan, cachedDevices]);
 
   const handleDisconnect = useCallback(async () => {
     await disconnect(
@@ -74,6 +83,10 @@ export const useBleManager = () => {
     [connectedDevice, led12State, led13State]
   );
 
+  const clearCache = useCallback(() => {
+    setCachedDevices([]);
+  }, []);
+
   return {
     isScanning,
     devices,
@@ -83,9 +96,11 @@ export const useBleManager = () => {
     led12State,
     led13State,
     isReconnecting,
+    cachedDevices,
     startScan: handleStartScan,
     connectToDevice: handleConnectToDevice,
     disconnect: handleDisconnect,
     toggleLed: handleToggleLed,
+    clearCache,
   };
 };
