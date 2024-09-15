@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Device } from 'react-native-ble-plx';
+import { colors } from '../styles/colors';
 
 interface Props {
   devices: Device[];
@@ -25,7 +26,9 @@ const DeviceList: React.FC<Props> = ({ devices, onDevicePress }) => {
             style={styles.deviceItem}
             onPress={() => onDevicePress(item)}
           >
-            <Text>{item.name || 'Невідомий пристрій'}</Text>
+            <Text style={styles.deviceName}>
+              {item.name || 'Невідомий пристрій'}
+            </Text>
             <Text style={styles.deviceId}>{item.id}</Text>
           </TouchableOpacity>
         )}
@@ -42,16 +45,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: colors.primary,
   },
   deviceItem: {
-    padding: 10,
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: colors.lightText,
+    backgroundColor: 'white',
+    marginBottom: 5,
+    borderRadius: 8,
+  },
+  deviceName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
   },
   deviceId: {
     fontSize: 12,
-    color: '#666',
+    color: colors.lightText,
+    marginTop: 5,
   },
 });
-
 export default DeviceList;

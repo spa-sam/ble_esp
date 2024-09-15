@@ -1,24 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useState } from 'react';
 import { Device } from 'react-native-ble-plx';
 import { useBleScan } from './useBleScan';
 import { connectToDevice, disconnect } from './bleConnection';
 import { toggleLed } from './ledControl';
 import { filterDevices } from '../utils/bleUtils';
+import { bleReducer, initialState, BleAction } from '../reducers/bleReducer';
 
 export const useBleManager = () => {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [cachedDevices, setCachedDevices] = useState<Device[]>([]);
-  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
-  const [analogValue, setAnalogValue] = useState<number | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [led12State, setLed12State] = useState(false);
-  const [led13State, setLed13State] = useState(false);
-  const [isReconnecting, setIsReconnecting] = useState(false);
+  const [state, dispatch] = useReducer(bleReducer, initialState);
+  const { startScan } = useBleScan();
+
   const [disconnectSubscription, setDisconnectSubscription] = useState<
     null | (() => void)
   >(null);
-
-  const { isScanning, startScan } = useBleScan();
 
   useEffect(() => {
     return () => {
@@ -32,9 +26,11 @@ export const useBleManager = () => {
     try {
       await connectToDevice(
         device,
-        setConnectedDevice,
-        setIsConnected,
-        setAnalogValue,
+
+        device => dispatch({ type: 'SET_CONNECTED_DEVICE', payload: device }),
+        isConnected =>
+          dispatch({ type: 'SET_IS_CONNECTED', payload: isConnected }),
+        value => dispatch({ type: 'SET_ANALOG_VALUE', payload: value }),
         setDisconnectSubscription
       );
     } catch (error) {
@@ -43,60 +39,73 @@ export const useBleManager = () => {
   }, []);
 
   const handleStartScan = useCallback(() => {
-    const cachedDevice = cachedDevices.find(device => filterDevices([device]));
+    const cachedDevice = state.cachedDevices.find(device =>
+      filterDevices([device])
+    );
     if (cachedDevice) {
       handleConnectToDevice(cachedDevice);
       return;
     }
 
     startScan(device => {
-      setDevices(prevDevices => [...prevDevices, device]);
-      setCachedDevices(prevCachedDevices => [...prevCachedDevices, device]);
+      dispatch({ type: 'SET_DEVICES', payload: [...state.devices, device] });
+      dispatch({
+        type: 'SET_CACHED_DEVICES',
+        payload: [...state.cachedDevices, device],
+      });
       handleConnectToDevice(device);
     });
-  }, [handleConnectToDevice, startScan, cachedDevices]);
+  }, [handleConnectToDevice, startScan, state.cachedDevices, state.devices]);
 
   const handleDisconnect = useCallback(async () => {
     await disconnect(
-      connectedDevice,
+      state.connectedDevice,
       disconnectSubscription,
-      setConnectedDevice,
-      setIsConnected,
-      setAnalogValue,
-      setLed12State,
-      setLed13State,
+
+      () => dispatch({ type: 'SET_CONNECTED_DEVICE', payload: null }),
+      isConnected =>
+        dispatch({ type: 'SET_IS_CONNECTED', payload: isConnected }),
+      () => dispatch({ type: 'SET_ANALOG_VALUE', payload: null }),
+      () =>
+        dispatch({
+          type: 'SET_LED_STATE',
+          payload: { ledNumber: 12, state: false },
+        }),
+      () =>
+        dispatch({
+          type: 'SET_LED_STATE',
+          payload: { ledNumber: 13, state: false },
+        }),
       setDisconnectSubscription
     );
-  }, [connectedDevice, disconnectSubscription]);
+  }, [state.connectedDevice, disconnectSubscription]);
 
   const handleToggleLed = useCallback(
     async (ledNumber: 12 | 13) => {
       await toggleLed(
-        connectedDevice,
+        state.connectedDevice,
         ledNumber,
-        led12State,
-        led13State,
-        setLed12State,
-        setLed13State
+
+        state.led12State,
+        state.led13State,
+        state =>
+          dispatch({
+            type: 'SET_LED_STATE',
+            payload: { ledNumber: 12, state },
+          }),
+        state =>
+          dispatch({ type: 'SET_LED_STATE', payload: { ledNumber: 13, state } })
       );
     },
-    [connectedDevice, led12State, led13State]
+    [state.connectedDevice, state.led12State, state.led13State]
   );
 
   const clearCache = useCallback(() => {
-    setCachedDevices([]);
+    dispatch({ type: 'CLEAR_CACHE' });
   }, []);
 
   return {
-    isScanning,
-    devices,
-    connectedDevice,
-    analogValue,
-    isConnected,
-    led12State,
-    led13State,
-    isReconnecting,
-    cachedDevices,
+    ...state,
     startScan: handleStartScan,
     connectToDevice: handleConnectToDevice,
     disconnect: handleDisconnect,
