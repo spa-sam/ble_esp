@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Switch, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
@@ -20,6 +20,19 @@ const LedControl: React.FC<Props> = ({
   toggleLed,
   toggleLedBlinking,
 }) => {
+  const [blinkState, setBlinkState] = useState({ led12: true, led13: true });
+
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      setBlinkState(prev => ({
+        led12: led12Blinking ? !prev.led12 : true,
+        led13: led13Blinking ? !prev.led13 : true,
+      }));
+    }, 500); // Змінюємо стан кожні 500 мс
+
+    return () => clearInterval(blinkInterval);
+  }, [led12Blinking, led13Blinking]);
+
   return (
     <View style={styles.container}>
       {[12, 13].map(ledNumber => (
@@ -28,22 +41,38 @@ const LedControl: React.FC<Props> = ({
             <Icon
               name={
                 ledNumber === 12
-                  ? led12State
-                    ? 'led-on'
-                    : 'led-off'
-                  : led13State
-                    ? 'led-on'
-                    : 'led-off'
+                  ? led12Blinking
+                    ? blinkState.led12
+                      ? 'led-on'
+                      : 'led-off'
+                    : led12State
+                      ? 'led-on'
+                      : 'led-off'
+                  : led13Blinking
+                    ? blinkState.led13
+                      ? 'led-on'
+                      : 'led-off'
+                    : led13State
+                      ? 'led-on'
+                      : 'led-off'
               }
               size={24}
               color={
                 ledNumber === 12
-                  ? led12State
-                    ? colors.success
-                    : colors.lightText
-                  : led13State
-                    ? colors.success
-                    : colors.lightText
+                  ? led12Blinking
+                    ? blinkState.led12
+                      ? colors.success
+                      : colors.lightText
+                    : led12State
+                      ? colors.success
+                      : colors.lightText
+                  : led13Blinking
+                    ? blinkState.led13
+                      ? colors.success
+                      : colors.lightText
+                    : led13State
+                      ? colors.success
+                      : colors.lightText
               }
             />
             <Text style={styles.ledLabel}>{ledNumber}</Text>
@@ -88,7 +117,6 @@ const LedControl: React.FC<Props> = ({
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
