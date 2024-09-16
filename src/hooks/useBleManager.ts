@@ -37,7 +37,6 @@ export const useBleManager = () => {
       console.log('Помилка підключення:', error);
     }
   }, []);
-
   const handleStartScan = useCallback(() => {
     const cachedDevice = state.cachedDevices.find(device =>
       filterDevices([device])
@@ -47,16 +46,29 @@ export const useBleManager = () => {
       return;
     }
 
-    startScan(device => {
-      dispatch({ type: 'SET_DEVICES', payload: [...state.devices, device] });
-      dispatch({
-        type: 'SET_CACHED_DEVICES',
-        payload: [...state.cachedDevices, device],
-      });
-      handleConnectToDevice(device);
+    startScan(async device => {
+      try {
+        const deviceWithRssi = await device.readRSSI();
+        dispatch({
+          type: 'SET_DEVICES',
+          payload: [...state.devices, deviceWithRssi],
+        });
+        dispatch({
+          type: 'SET_CACHED_DEVICES',
+          payload: [...state.cachedDevices, deviceWithRssi],
+        });
+        handleConnectToDevice(deviceWithRssi);
+      } catch (error) {
+        console.log('Помилка при читанні RSSI:', error);
+        dispatch({ type: 'SET_DEVICES', payload: [...state.devices, device] });
+        dispatch({
+          type: 'SET_CACHED_DEVICES',
+          payload: [...state.cachedDevices, device],
+        });
+        handleConnectToDevice(device);
+      }
     });
   }, [handleConnectToDevice, startScan, state.cachedDevices, state.devices]);
-
   const handleDisconnect = useCallback(async () => {
     await disconnect(
       state.connectedDevice,

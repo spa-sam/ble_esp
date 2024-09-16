@@ -29,7 +29,10 @@ const DeviceList: React.FC<Props> = ({ devices, onDevicePress }) => {
             <Text style={styles.deviceName}>
               {item.name || 'Невідомий пристрій'}
             </Text>
-            <Text style={styles.deviceId}>{item.id}</Text>
+            <Text style={styles.deviceInfo}>ID: {item.id}</Text>
+            {item.rssi && (
+              <Text style={styles.deviceInfo}>RSSI: {item.rssi} dBm</Text>
+            )}
           </TouchableOpacity>
         )}
       />
@@ -60,10 +63,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
   },
-  deviceId: {
+  deviceInfo: {
     fontSize: 12,
     color: colors.lightText,
     marginTop: 5,
   },
 });
+
 export default DeviceList;
