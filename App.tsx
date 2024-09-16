@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+} from 'react-native';
 import ScanButton from './src/components/ScanButton';
 import ConnectedComponents from './src/components/ConnectedComponents';
 import { useBleManager } from './src/hooks/useBleManager';
@@ -26,27 +33,30 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <View style={styles.container}>
-        <Text style={styles.title}>BLE ESP32-C3</Text>
-        <View style={styles.scanButtonContainer}>
-          <ScanButton
-            isScanning={isScanning}
-            isConnected={isConnected}
-            onScanPress={startScan}
-            onDisconnectPress={disconnect}
-          />
+
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.title}>BLE ESP32-C3</Text>
+          <View style={styles.scanButtonContainer}>
+            <ScanButton
+              isScanning={isScanning}
+              isConnected={isConnected}
+              onScanPress={startScan}
+              onDisconnectPress={disconnect}
+            />
+          </View>
+          {isConnected && (
+            <ConnectedComponents
+              connectedDevice={connectedDevice}
+              analogValue={analogValue}
+              led12State={led12State}
+              led13State={led13State}
+              toggleLed={toggleLed}
+            />
+          )}
+          {isReconnecting && renderReconnectingText()}
         </View>
-        {isConnected && (
-          <ConnectedComponents
-            connectedDevice={connectedDevice}
-            analogValue={analogValue}
-            led12State={led12State}
-            led13State={led13State}
-            toggleLed={toggleLed}
-          />
-        )}
-        {isReconnecting && renderReconnectingText()}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -55,6 +65,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   container: {
     flex: 1,
