@@ -18,16 +18,18 @@ export const toggleLed = async (
   if (!connectedDevice) return;
 
   const newState = ledNumber === 12 ? !led12State : !led13State;
-  const ledStates = new Uint8Array([
-    ledNumber === 12 ? Number(newState) : Number(led12State),
-    ledNumber === 13 ? Number(newState) : Number(led13State),
+
+  const ledControl = new Uint8Array([
+    ledNumber === 12 ? 0 : 1,
+    newState ? 1 : 0,
   ]);
 
   try {
     await connectedDevice.writeCharacteristicWithoutResponseForService(
       ESP32_SERVICE_UUID,
-      ESP32_LED_CHARACTERISTIC_UUID,
-      base64encode(String.fromCharCode.apply(null, Array.from(ledStates)))
+
+      ESP32_LED_CONTROL_CHARACTERISTIC_UUID,
+      base64encode(String.fromCharCode.apply(null, Array.from(ledControl)))
     );
 
     if (ledNumber === 12) {
@@ -39,7 +41,6 @@ export const toggleLed = async (
     console.log('Помилка при зміні стану світлодіода:', error);
   }
 };
-
 export const toggleLedBlinking = async (
   connectedDevice: Device | null,
   ledNumber: 12 | 13,
@@ -54,7 +55,7 @@ export const toggleLedBlinking = async (
 
   const ledControl = new Uint8Array([
     ledNumber === 12 ? 0 : 1,
-    newState ? 2 : 0,
+    newState ? 2 : 1,
   ]);
 
   try {
@@ -73,7 +74,6 @@ export const toggleLedBlinking = async (
     console.log('Помилка при зміні стану мигання світлодіода:', error);
   }
 };
-
 export const setBlinkPeriod = async (
   connectedDevice: Device | null,
   period: number

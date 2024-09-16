@@ -143,7 +143,6 @@ void updateLedState(uint8_t pin, LedState state) {
       break;
   }
 }
-
 void loop() {
   if (deviceConnected) {
     uint16_t analogValue = analogRead(ANALOG_PIN);
