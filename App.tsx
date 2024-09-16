@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   View,
   Text,
@@ -20,9 +21,12 @@ export default function App() {
     isConnected,
     led12State,
     led13State,
+    led12Blinking,
+    led13Blinking,
     isReconnecting,
     startScan,
     toggleLed,
+    toggleLedBlinking,
     disconnect,
   } = useBleManager();
 
@@ -33,7 +37,6 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <Text style={styles.title}>BLE ESP32-C3</Text>
@@ -51,7 +54,10 @@ export default function App() {
               analogValue={analogValue}
               led12State={led12State}
               led13State={led13State}
+              led12Blinking={led12Blinking}
+              led13Blinking={led13Blinking}
               toggleLed={toggleLed}
+              toggleLedBlinking={toggleLedBlinking}
             />
           )}
           {isReconnecting && renderReconnectingText()}

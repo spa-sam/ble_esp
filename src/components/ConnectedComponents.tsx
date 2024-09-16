@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Device } from 'react-native-ble-plx';
 import ConnectedDevice from './ConnectedDevice';
 import AnalogValue from './AnalogValue';
@@ -11,7 +11,10 @@ interface Props {
   analogValue: number | null;
   led12State: boolean;
   led13State: boolean;
+  led12Blinking: boolean;
+  led13Blinking: boolean;
   toggleLed: (ledNumber: 12 | 13) => void;
+  toggleLedBlinking: (ledNumber: 12 | 13) => void;
 }
 
 const ConnectedComponents: React.FC<Props> = ({
@@ -19,7 +22,10 @@ const ConnectedComponents: React.FC<Props> = ({
   analogValue,
   led12State,
   led13State,
+  led12Blinking,
+  led13Blinking,
   toggleLed,
+  toggleLedBlinking,
 }) => (
   <View style={styles.container}>
     <ConnectedDevice device={connectedDevice} />
@@ -29,7 +35,10 @@ const ConnectedComponents: React.FC<Props> = ({
     <LedControl
       led12State={led12State}
       led13State={led13State}
+      led12Blinking={led12Blinking}
+      led13Blinking={led13Blinking}
       toggleLed={toggleLed}
+      toggleLedBlinking={toggleLedBlinking}
     />
   </View>
 );

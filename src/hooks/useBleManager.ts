@@ -2,10 +2,9 @@ import { useReducer, useEffect, useCallback, useState } from 'react';
 import { Device } from 'react-native-ble-plx';
 import { useBleScan } from './useBleScan';
 import { connectToDevice, disconnect } from './bleConnection';
-import { toggleLed } from './ledControl';
+import { toggleLed, toggleLedBlinking, setBlinkPeriod } from './ledControl';
 import { filterDevices } from '../utils/bleUtils';
 import { bleReducer, initialState, BleAction } from '../reducers/bleReducer';
-
 export const useBleManager = () => {
   const [state, dispatch] = useReducer(bleReducer, initialState);
   const { startScan } = useBleScan();
@@ -97,19 +96,64 @@ export const useBleManager = () => {
       await toggleLed(
         state.connectedDevice,
         ledNumber,
-
         state.led12State,
         state.led13State,
-        state =>
+        state => {
           dispatch({
             type: 'SET_LED_STATE',
             payload: { ledNumber: 12, state },
-          }),
-        state =>
-          dispatch({ type: 'SET_LED_STATE', payload: { ledNumber: 13, state } })
+          });
+          if (!state) {
+            dispatch({
+              type: 'SET_LED_BLINKING',
+              payload: { ledNumber: 12, blinking: false },
+            });
+          }
+        },
+        state => {
+          dispatch({
+            type: 'SET_LED_STATE',
+            payload: { ledNumber: 13, state },
+          });
+          if (!state) {
+            dispatch({
+              type: 'SET_LED_BLINKING',
+              payload: { ledNumber: 13, blinking: false },
+            });
+          }
+        }
       );
     },
     [state.connectedDevice, state.led12State, state.led13State]
+  );
+  const handleToggleLedBlinking = useCallback(
+    async (ledNumber: 12 | 13) => {
+      await toggleLedBlinking(
+        state.connectedDevice,
+        ledNumber,
+        state.led12Blinking,
+        state.led13Blinking,
+        blinking =>
+          dispatch({
+            type: 'SET_LED_BLINKING',
+            payload: { ledNumber: 12, blinking },
+          }),
+        blinking =>
+          dispatch({
+            type: 'SET_LED_BLINKING',
+            payload: { ledNumber: 13, blinking },
+          })
+      );
+    },
+    [state.connectedDevice, state.led12Blinking, state.led13Blinking]
+  );
+
+  const handleSetBlinkPeriod = useCallback(
+    async (period: number) => {
+      await setBlinkPeriod(state.connectedDevice, period);
+      dispatch({ type: 'SET_BLINK_PERIOD', payload: period });
+    },
+    [state.connectedDevice]
   );
 
   const clearCache = useCallback(() => {
@@ -122,6 +166,8 @@ export const useBleManager = () => {
     connectToDevice: handleConnectToDevice,
     disconnect: handleDisconnect,
     toggleLed: handleToggleLed,
+    toggleLedBlinking: handleToggleLedBlinking,
+    setBlinkPeriod: handleSetBlinkPeriod,
     clearCache,
   };
 };

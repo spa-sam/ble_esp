@@ -10,6 +10,9 @@ export interface BleState {
   led13State: boolean;
   isScanning: boolean;
   isReconnecting: boolean;
+  led12Blinking: boolean;
+  led13Blinking: boolean;
+  blinkPeriod: number;
 }
 
 export type BleAction =
@@ -21,7 +24,12 @@ export type BleAction =
   | { type: 'SET_LED_STATE'; payload: { ledNumber: 12 | 13; state: boolean } }
   | { type: 'SET_IS_SCANNING'; payload: boolean }
   | { type: 'SET_IS_RECONNECTING'; payload: boolean }
-  | { type: 'CLEAR_CACHE' };
+  | { type: 'CLEAR_CACHE' }
+  | {
+      type: 'SET_LED_BLINKING';
+      payload: { ledNumber: 12 | 13; blinking: boolean };
+    }
+  | { type: 'SET_BLINK_PERIOD'; payload: number };
 
 export const initialState: BleState = {
   devices: [],
@@ -33,7 +41,11 @@ export const initialState: BleState = {
   led13State: false,
   isScanning: false,
   isReconnecting: false,
+  led12Blinking: false,
+  led13Blinking: false,
+  blinkPeriod: 1000,
 };
+
 export const bleReducer = (state: BleState, action: BleAction): BleState => {
   switch (action.type) {
     case 'SET_DEVICES':
@@ -58,6 +70,14 @@ export const bleReducer = (state: BleState, action: BleAction): BleState => {
       return { ...state, isReconnecting: action.payload };
     case 'CLEAR_CACHE':
       return { ...state, cachedDevices: [] };
+    case 'SET_LED_BLINKING':
+      return {
+        ...state,
+        [action.payload.ledNumber === 12 ? 'led12Blinking' : 'led13Blinking']:
+          action.payload.blinking,
+      };
+    case 'SET_BLINK_PERIOD':
+      return { ...state, blinkPeriod: action.payload };
     default:
       return state;
   }
