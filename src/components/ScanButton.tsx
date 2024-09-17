@@ -63,12 +63,7 @@ const ScanButton: React.FC<Props> = ({
     >
       {isScanning ? (
         <Animated.View style={{ transform: [{ rotate: spin }] }}>
-          <Icon
-            name="bluetooth-searching"
-            size={24}
-            color={colors.background}
-            style={styles.icon}
-          />
+          <Icon name="bluetooth" size={24} color={colors.primary} />
         </Animated.View>
       ) : (
         <Icon

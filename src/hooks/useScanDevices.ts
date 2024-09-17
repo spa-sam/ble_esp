@@ -4,7 +4,7 @@ import { requestPermissions, filterDevices } from '../utils/bleUtils';
 
 const manager = new BleManager();
 
-export const useBleScan = () => {
+export const useScanDevices = () => {
   const [isScanning, setIsScanning] = useState(false);
 
   const startScan = useCallback(
