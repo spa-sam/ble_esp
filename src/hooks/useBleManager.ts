@@ -5,8 +5,6 @@ import { connectToDevice, disconnect } from './bleConnection';
 import { toggleLed, toggleLedBlinking, setBlinkPeriod } from './ledControl';
 import { filterDevices } from '../utils/bleUtils';
 import { bleReducer, initialState, BleAction } from '../reducers/bleReducer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 export const useBleManager = () => {
   const [state, dispatch] = useReducer(bleReducer, initialState);
   const { startScan } = useBleScan();
@@ -14,14 +12,6 @@ export const useBleManager = () => {
   const [disconnectSubscription, setDisconnectSubscription] = useState<
     null | (() => void)
   >(null);
-
-  useEffect(() => {
-    const loadDevices = async () => {
-      const devices = await loadCachedDevices();
-      dispatch({ type: 'SET_CACHED_DEVICES', payload: devices });
-    };
-    loadDevices();
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -67,7 +57,6 @@ export const useBleManager = () => {
           payload: [...state.cachedDevices, deviceWithRssi],
         });
         handleConnectToDevice(deviceWithRssi);
-        saveCachedDevices([...state.cachedDevices, deviceWithRssi]);
       } catch (error) {
         console.log('Помилка при читанні RSSI:', error);
         dispatch({ type: 'SET_DEVICES', payload: [...state.devices, device] });
@@ -76,7 +65,6 @@ export const useBleManager = () => {
           payload: [...state.cachedDevices, device],
         });
         handleConnectToDevice(device);
-        saveCachedDevices([...state.cachedDevices, device]);
       }
     });
   }, [handleConnectToDevice, startScan, state.cachedDevices, state.devices]);
@@ -168,8 +156,7 @@ export const useBleManager = () => {
     [state.connectedDevice]
   );
 
-  const clearCache = useCallback(async () => {
-    await AsyncStorage.removeItem('cachedDevices');
+  const clearCache = useCallback(() => {
     dispatch({ type: 'CLEAR_CACHE' });
   }, []);
 
@@ -183,29 +170,4 @@ export const useBleManager = () => {
     setBlinkPeriod: handleSetBlinkPeriod,
     clearCache,
   };
-};
-
-const saveCachedDevices = async (devices: Device[]) => {
-  try {
-    const devicesData = devices.map(device => ({
-      id: device.id,
-      name: device.name,
-      rssi: device.rssi,
-    }));
-    await AsyncStorage.setItem('cachedDevices', JSON.stringify(devicesData));
-  } catch (error) {
-    console.error('Помилка при збереженні кешованих пристроїв:', error);
-  }
-};
-
-const loadCachedDevices = async (): Promise<Device[]> => {
-  try {
-    const cachedDevicesJson = await AsyncStorage.getItem('cachedDevices');
-    if (cachedDevicesJson) {
-      return JSON.parse(cachedDevicesJson);
-    }
-  } catch (error) {
-    console.error('Помилка при завантаженні кешованих пристроїв:', error);
-  }
-  return [];
 };
