@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   View,
   Text,
@@ -10,60 +9,25 @@ import {
 } from 'react-native';
 import ScanButton from './src/components/ScanButton';
 import ConnectedComponents from './src/components/ConnectedComponents';
-import { useBleManager } from './src/hooks/useBleManager';
 import { colors } from './src/styles/colors';
+import { BleProvider } from './src/context/BleContext';
 
 export default function App() {
-  const {
-    isScanning,
-    connectedDevice,
-    analogValue,
-    isConnected,
-    led12State,
-    led13State,
-    led12Blinking,
-    led13Blinking,
-    isReconnecting,
-    startScan,
-    toggleLed,
-    toggleLedBlinking,
-    disconnect,
-  } = useBleManager();
-
-  const renderReconnectingText = () => (
-    <Text style={styles.reconnectingText}>Переподключення...</Text>
-  );
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.container}>
-          <Text style={styles.title}>BLE ESP32-C3</Text>
-          <View style={styles.scanButtonContainer}>
-            <ScanButton
-              isScanning={isScanning}
-              isConnected={isConnected}
-              onScanPress={startScan}
-              onDisconnectPress={disconnect}
-            />
+    <BleProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.container}>
+            <Text style={styles.title}>BLE ESP32-C3</Text>
+            <View style={styles.scanButtonContainer}>
+              <ScanButton />
+            </View>
+            <ConnectedComponents />
           </View>
-          {isConnected && (
-            <ConnectedComponents
-              connectedDevice={connectedDevice}
-              analogValue={analogValue}
-              led12State={led12State}
-              led13State={led13State}
-              led12Blinking={led12Blinking}
-              led13Blinking={led13Blinking}
-              toggleLed={toggleLed}
-              toggleLedBlinking={toggleLedBlinking}
-            />
-          )}
-          {isReconnecting && renderReconnectingText()}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </BleProvider>
   );
 }
 

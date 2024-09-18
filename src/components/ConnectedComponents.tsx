@@ -1,47 +1,35 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Device } from 'react-native-ble-plx';
 import ConnectedDevice from './ConnectedDevice';
 import AnalogValue from './AnalogValue';
 import LedControl from './LedControl';
 import { colors } from '../styles/colors';
+import { useBle } from '../context/BleContext';
 
-interface Props {
-  connectedDevice: Device | null;
-  analogValue: number | null;
-  led12State: boolean;
-  led13State: boolean;
-  led12Blinking: boolean;
-  led13Blinking: boolean;
-  toggleLed: (ledNumber: 12 | 13) => void;
-  toggleLedBlinking: (ledNumber: 12 | 13) => void;
-}
+const ConnectedComponents: React.FC = () => {
+  const {
+    connectedDevice,
+    analogValue,
+    led12State,
+    led13State,
+    led12Blinking,
+    led13Blinking,
+    toggleLed,
+    toggleLedBlinking,
+  } = useBle();
 
-const ConnectedComponents: React.FC<Props> = ({
-  connectedDevice,
-  analogValue,
-  led12State,
-  led13State,
-  led12Blinking,
-  led13Blinking,
-  toggleLed,
-  toggleLedBlinking,
-}) => (
-  <View style={styles.container}>
-    <ConnectedDevice device={connectedDevice} />
-    <View style={styles.divider} />
-    <AnalogValue value={analogValue} />
-    <View style={styles.divider} />
-    <LedControl
-      led12State={led12State}
-      led13State={led13State}
-      led12Blinking={led12Blinking}
-      led13Blinking={led13Blinking}
-      toggleLed={toggleLed}
-      toggleLedBlinking={toggleLedBlinking}
-    />
-  </View>
-);
+  if (!connectedDevice) return null;
+
+  return (
+    <View style={styles.container}>
+      <ConnectedDevice />
+      <View style={styles.divider} />
+      <AnalogValue />
+      <View style={styles.divider} />
+      <LedControl />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -62,4 +50,5 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
 export default ConnectedComponents;

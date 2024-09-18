@@ -2,24 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Switch, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
+import { useBle } from '../context/BleContext';
 
-interface Props {
-  led12State: boolean;
-  led13State: boolean;
-  led12Blinking: boolean;
-  led13Blinking: boolean;
-  toggleLed: (ledNumber: 12 | 13) => void;
-  toggleLedBlinking: (ledNumber: 12 | 13) => void;
-}
+const LedControl: React.FC = () => {
+  const {
+    led12State,
+    led13State,
+    led12Blinking,
+    led13Blinking,
+    toggleLed,
+    toggleLedBlinking,
+  } = useBle();
 
-const LedControl: React.FC<Props> = ({
-  led12State,
-  led13State,
-  led12Blinking,
-  led13Blinking,
-  toggleLed,
-  toggleLedBlinking,
-}) => {
   const [blinkState, setBlinkState] = useState({ led12: true, led13: true });
 
   useEffect(() => {
@@ -117,6 +111,7 @@ const LedControl: React.FC<Props> = ({
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
@@ -159,5 +154,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
 export default LedControl;

@@ -1,34 +1,19 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  Animated,
-} from 'react-native';
+import { TouchableOpacity, Text, Animated, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
+import { useBle } from '../context/BleContext';
 
-interface Props {
-  isScanning: boolean;
-  isConnected: boolean;
-  onScanPress: () => void;
-  onDisconnectPress: () => void;
-}
+const ScanButton: React.FC = () => {
+  const { isScanning, isConnected, startScan, disconnect } = useBle();
 
-const ScanButton: React.FC<Props> = ({
-  isScanning,
-  isConnected,
-  onScanPress,
-  onDisconnectPress,
-}) => {
   const buttonTitle = isConnected
     ? 'Відключитися'
     : isScanning
       ? 'Сканування...'
       : 'Почати сканування';
 
-  const handlePress = isConnected ? onDisconnectPress : onScanPress;
+  const handlePress = isConnected ? disconnect : startScan;
 
   const spinValue = new Animated.Value(0);
 
@@ -110,5 +95,4 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
-
 export default ScanButton;

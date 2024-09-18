@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Device } from 'react-native-ble-plx';
 import { colors } from '../styles/colors';
+import { useBle } from '../context/BleContext';
 
-interface Props {
-  device: Device | null;
-}
-
-const ConnectedDevice: React.FC<Props> = ({ device }) => {
+const ConnectedDevice: React.FC = () => {
+  const { connectedDevice } = useBle();
   const [rssi, setRssi] = useState<number | null>(null);
 
   useEffect(() => {
     const updateRssi = async () => {
-      if (device) {
+      if (connectedDevice) {
         try {
-          const updatedDevice = await device.readRSSI();
+          const updatedDevice = await connectedDevice.readRSSI();
           setRssi(updatedDevice.rssi);
         } catch (error) {
           console.log('Помилка при читанні RSSI:', error);
@@ -26,17 +23,16 @@ const ConnectedDevice: React.FC<Props> = ({ device }) => {
     const interval = setInterval(updateRssi, 5000); // Оновлюємо RSSI кожні 5 секунд
 
     return () => clearInterval(interval);
-  }, [device]);
-
-  if (!device) return null;
+  }, [connectedDevice]);
+  if (!connectedDevice) return null;
 
   return (
     <View style={styles.connectedDeviceCard}>
       <Text style={styles.connectedDeviceTitle}>Підключений пристрій:</Text>
       <Text style={styles.deviceName}>
-        {device.name || 'Невідомий пристрій'}
+        {connectedDevice.name || 'Невідомий пристрій'}
       </Text>
-      <Text style={styles.deviceInfo}>ID: {device.id}</Text>
+      <Text style={styles.deviceInfo}>ID: {connectedDevice.id}</Text>
       {rssi !== null && <Text style={styles.deviceInfo}>RSSI: {rssi} dBm</Text>}
     </View>
   );
@@ -70,5 +66,4 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 });
-
 export default ConnectedDevice;

@@ -1,30 +1,28 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors } from '../styles/colors';
+import { useBle } from '../context/BleContext';
 
-interface Props {
-  value: number | null;
-}
-
-const AnalogValue: React.FC<Props> = ({ value }) => {
+const AnalogValue: React.FC = () => {
+  const { analogValue } = useBle();
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(progressAnim, {
-      toValue: value !== null ? (value / 4095) * 100 : 0,
+      toValue: analogValue !== null ? (analogValue / 4095) * 100 : 0,
       duration: 300,
       useNativeDriver: false,
     }).start();
-  }, [value]);
+  }, [analogValue]);
 
-  if (value === null) return null;
+  if (analogValue === null) return null;
 
-  const percentage = (value / 4095) * 100;
+  const percentage = (analogValue / 4095) * 100;
 
   return (
     <View style={styles.analogValueCard}>
       <Text style={styles.analogValueTitle}>Дані з аналогового датчика:</Text>
-      <Text style={styles.analogValue}>{value}</Text>
+      <Text style={styles.analogValue}>{analogValue}</Text>
       <View style={styles.progressBarContainer}>
         <Animated.View
           style={[
@@ -42,6 +40,7 @@ const AnalogValue: React.FC<Props> = ({ value }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   analogValueCard: {
     backgroundColor: colors.background,
@@ -84,4 +83,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
 });
+
 export default AnalogValue;
