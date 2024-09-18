@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { TouchableOpacity, Text, Animated, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
@@ -7,17 +7,20 @@ import { useBle } from '../context/BleContext';
 const ScanButton: React.FC = () => {
   const { isScanning, isConnected, startScan, disconnect } = useBle();
 
-  const buttonTitle = isConnected
-    ? 'Відключитися'
-    : isScanning
-      ? 'Сканування...'
-      : 'Почати сканування';
+  const buttonTitle = useMemo(() => {
+    return isConnected
+      ? 'Відключитися'
+      : isScanning
+        ? 'Сканування...'
+        : 'Почати сканування';
+  }, [isConnected, isScanning]);
 
-  const handlePress = isConnected ? disconnect : startScan;
+  const handlePress = useMemo(() => {
+    return isConnected ? disconnect : startScan;
+  }, [isConnected, disconnect, startScan]);
 
   const spinValue = new Animated.Value(0);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (isScanning) {
       Animated.loop(
         Animated.timing(spinValue, {
@@ -95,4 +98,5 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
+
 export default ScanButton;

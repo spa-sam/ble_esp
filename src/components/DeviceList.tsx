@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,26 +15,32 @@ interface Props {
 }
 
 const DeviceList: React.FC<Props> = ({ devices, onDevicePress }) => {
+  const renderItem = useMemo(
+    () =>
+      ({ item }: { item: Device }) => (
+        <TouchableOpacity
+          style={styles.deviceItem}
+          onPress={() => onDevicePress(item)}
+        >
+          <Text style={styles.deviceName}>
+            {item.name || 'Невідомий пристрій'}
+          </Text>
+          <Text style={styles.deviceInfo}>ID: {item.id}</Text>
+          {item.rssi && (
+            <Text style={styles.deviceInfo}>RSSI: {item.rssi} dBm</Text>
+          )}
+        </TouchableOpacity>
+      ),
+    [onDevicePress]
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Знайдені пристрої:</Text>
       <FlatList
         data={devices}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.deviceItem}
-            onPress={() => onDevicePress(item)}
-          >
-            <Text style={styles.deviceName}>
-              {item.name || 'Невідомий пристрій'}
-            </Text>
-            <Text style={styles.deviceInfo}>ID: {item.id}</Text>
-            {item.rssi && (
-              <Text style={styles.deviceInfo}>RSSI: {item.rssi} dBm</Text>
-            )}
-          </TouchableOpacity>
-        )}
+        renderItem={renderItem}
       />
     </View>
   );

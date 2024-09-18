@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../styles/colors';
 import { useBle } from '../context/BleContext';
@@ -29,16 +29,29 @@ const ConnectedDevice: React.FC<Props> = ({ device }) => {
 
     return () => clearInterval(interval);
   }, [connectedDevice]);
+
+  const deviceInfo = useMemo(() => {
+    if (!connectedDevice) return null;
+    return (
+      <>
+        <Text style={styles.deviceName}>
+          {connectedDevice.name || 'Невідомий пристрій'}
+        </Text>
+        <Text style={styles.deviceInfo}>ID: {connectedDevice.id}</Text>
+        {rssi !== null && (
+          <Text style={styles.deviceInfo}>RSSI: {rssi} dBm</Text>
+        )}
+      </>
+    );
+  }, [connectedDevice, rssi]);
+
   if (!connectedDevice) return null;
 
   return (
     <View style={styles.connectedDeviceCard}>
       <Text style={styles.connectedDeviceTitle}>Підключений пристрій:</Text>
-      <Text style={styles.deviceName}>
-        {connectedDevice.name || 'Невідомий пристрій'}
-      </Text>
-      <Text style={styles.deviceInfo}>ID: {connectedDevice.id}</Text>
-      {rssi !== null && <Text style={styles.deviceInfo}>RSSI: {rssi} dBm</Text>}
+
+      {deviceInfo}
     </View>
   );
 };
@@ -71,4 +84,5 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 });
+
 export default ConnectedDevice;

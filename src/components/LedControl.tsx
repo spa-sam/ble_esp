@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Switch, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
 import { useBle } from '../context/BleContext';
-
 const LedControl: React.FC = () => {
   const {
     led12State,
@@ -27,9 +26,9 @@ const LedControl: React.FC = () => {
     return () => clearInterval(blinkInterval);
   }, [led12Blinking, led13Blinking]);
 
-  return (
-    <View style={styles.container}>
-      {[12, 13].map(ledNumber => (
+  const ledControls = useMemo(
+    () =>
+      [12, 13].map(ledNumber => (
         <View key={ledNumber} style={styles.ledControl}>
           <View style={styles.ledInfo}>
             <Icon
@@ -107,11 +106,20 @@ const LedControl: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-      ))}
-    </View>
+      )),
+    [
+      led12State,
+      led13State,
+      led12Blinking,
+      led13Blinking,
+      blinkState,
+      toggleLed,
+      toggleLedBlinking,
+    ]
   );
-};
 
+  return <View style={styles.container}>{ledControls}</View>;
+};
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors } from '../styles/colors';
 import { useBle } from '../context/BleContext';
@@ -15,9 +15,12 @@ const AnalogValue: React.FC = () => {
     }).start();
   }, [analogValue]);
 
-  if (analogValue === null) return null;
+  const percentage = useMemo(
+    () => (analogValue !== null ? (analogValue / 4095) * 100 : 0),
+    [analogValue]
+  );
 
-  const percentage = (analogValue / 4095) * 100;
+  if (analogValue === null) return null;
 
   return (
     <View style={styles.analogValueCard}>

@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useMemo } from 'react';
 import { Device } from 'react-native-ble-plx';
 import { useScanDevices } from './useScanDevices';
 import { useDeviceConnection } from './useDeviceConnection';
@@ -37,6 +37,7 @@ export const useBleManager = () => {
 
     [connectToDevice, startAnalogValueStreaming, dispatch]
   );
+
   const handleStartScan = useCallback(() => {
     const cachedDevice = state.cachedDevices.find(device =>
       filterDevices([device])
