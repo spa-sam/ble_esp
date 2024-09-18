@@ -2,8 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../styles/colors';
 import { useBle } from '../context/BleContext';
+import { Device } from 'react-native-ble-plx';
 
-const ConnectedDevice: React.FC = () => {
+interface Props {
+  device: Device | null;
+}
+
+const ConnectedDevice: React.FC<Props> = ({ device }) => {
   const { connectedDevice } = useBle();
   const [rssi, setRssi] = useState<number | null>(null);
 

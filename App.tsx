@@ -1,62 +1,55 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-} from 'react-native';
-import ScanButton from './src/components/ScanButton';
-import ConnectedComponents from './src/components/ConnectedComponents';
-import { colors } from './src/styles/colors';
+import { enableScreens } from 'react-native-screens';
+import { StatusBar } from 'react-native';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MainScreen from './src/screens/MainScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { BleProvider } from './src/context/BleContext';
+import { colors } from './src/styles/colors';
+
+const Tab = createBottomTabNavigator();
 
 export default function App() {
+  enableScreens();
+
   return (
-    <BleProvider>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" />
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.title}>BLE ESP32-C3</Text>
-            <View style={styles.scanButtonContainer}>
-              <ScanButton />
-            </View>
-            <ConnectedComponents />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </BleProvider>
+    <SafeAreaProvider>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <BleProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: true,
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName;
+
+                if (route.name === 'Головна') {
+                  iconName = focused ? 'bluetooth-connect' : 'bluetooth';
+                } else if (route.name === 'Налаштування') {
+                  iconName = focused ? 'cog' : 'cog-outline';
+                }
+
+                return (
+                  <Icon
+                    name={iconName || 'default-icon'}
+                    size={size}
+                    color={color}
+                  />
+                );
+              },
+              tabBarActiveTintColor: colors.primary,
+              tabBarInactiveTintColor: colors.lightText,
+            })}
+          >
+            <Tab.Screen name="Головна" component={MainScreen} />
+            <Tab.Screen name="Налаштування" component={SettingsScreen} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </BleProvider>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: colors.primary,
-  },
-  scanButtonContainer: {
-    marginBottom: 20,
-  },
-  reconnectingText: {
-    textAlign: 'center',
-    color: colors.warning,
-    marginTop: 10,
-  },
-});
